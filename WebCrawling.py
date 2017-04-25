@@ -3,28 +3,49 @@ import requests
 import re
 import random
 import time
+from bs4 import BeautifulSoup
 from requests.utils import unquote
 from urllib.parse import urlparse
 with open('movie_titles.txt', 'r') as myfile:
     movies = myfile.readlines()
+j = 0
 for movie in movies:
     movie = movie[movie.find(','):]
     movie = movie[1:]
     year = movie[0:movie.find(',')]
     name = movie[movie.find(','):]
-    name = name[1:]
-    print(name)
-    res_search = standard_search.search(name, 1)
-    for s in res_search:
-        link = s.link
-        linkStr = urlparse(link)
-        print(linkStr[1])
-        linkStr = linkStr[1]
-        web_name = linkStr[linkStr.find('.'):linkStr.find('.')]
-        print(web_name)
-        print(s.name)
-        print(s.link)
-    rand = random.uniform(0.1, 5)
-    time.sleep(rand)
+    name = name[1:name.find('\n')]
+    query = "%s %s"%(name,year)
+    query = query.replace("'", "")
+    query = query.replace("&", "and")
+    print(query)
+    url = "http://search.yahoo.com/search?p=%s"
+    r = requests.get(url % query)
+    soup = BeautifulSoup(r.text, "html.parser")
+    divs = soup.findAll("div", attrs={"class": "compTitle options-toggle"})
+    print(r.url)
+    results = []
+    for li in divs:
+        a = li.find("a")
+        link = a["href"]
+        web_name = link[link.find('.')+1:]
+        web_name = web_name[:web_name.find('.')]
+        if web_name == "imdb":
+            print("IMDB:")
+            print(link)
+            imdb = requests.get(link)
+            imdb_soup = BeautifulSoup(imdb.text, "html.parser")
+            j = j+1
+            print(j)
+            break
+        elif web_name == "rottentomatoes" :
+            print("Rotten Tomatoes:")
+            print(link)
+            imdb = requests.get(link)
+            imdb_soup = BeautifulSoup(imdb.text, "html.parser")
+            j = j+1
+            print(j)
+            break
+print(j)
 
 
