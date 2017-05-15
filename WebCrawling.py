@@ -174,6 +174,7 @@ def get_results(name, year, j):
     if 'rate' not in res.keys():
         res['rate'] = ""
     df = pd.DataFrame({name:[year, res['genre0'],res['genre1'],res['genre2'], res['actor0'],res['actor1'],res['actor2'], res['director'], res['time'], res['country'], res['rate']]})
+    df.to_csv(r'C:\Users\inbar\Desktop\project\ProjectNetflix\Movies_info.csv')
     print(df)
     driver.close()
     return j
