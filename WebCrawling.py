@@ -8,7 +8,7 @@ from selenium.webdriver.common.keys import Keys
 import pandas as pd
 
 def imdb_pars(imdb_soup):
-        print(imdb_soup.prettify())
+        #print(imdb_soup.prettify())
         res = dict()
         inf = imdb_soup.find("div", attrs={"class": "subtext"})
         time = inf.find("time")
@@ -23,28 +23,31 @@ def imdb_pars(imdb_soup):
             if (span):
                 Genre = span.text
                 res[key] = Genre
-                i = i + 1
+            i = i + 1
         if i < 3:
             while i < 3:
                 key = "genre" + str(i)
                 res[key] = ""
                 i = i + 1
-        inf_actors = imdb_soup.find("div", attrs={"class": "credit_summary_item"})
-        i = 0
-        for actor in inf_actors.findAll("span", attrs={"itemprop": "actors"}):
-            if i == 3:
-                break
-            tmp1 = actor.find("a")
-            tmp2 = tmp1.find("span", attrs={"class":"itemprop","itemprop": "name"})
-            Actor = tmp2.text
-            key = "actor"+str(i)
-            res[key] = Actor
-            i = i + 1
-        if i < 3:
-            while i < 3:
-                key = "actor" + str(i)
-                res[key] = ""
-                i = i + 1
+        cred_sums = imdb_soup.findAll("div", attrs={"class": "credit_summary_item"})
+        for cred_sum in cred_sums:
+            h =  cred_sum.find("h4")
+            if h.text == "Stars:":
+                i = 0
+                for actor in cred_sum.findAll("span", attrs={"itemprop": "actors"}):
+                    if i == 3:
+                        break
+                    tmp1 = actor.find("a")
+                    tmp2 = tmp1.find("span", attrs={"class":"itemprop","itemprop": "name"})
+                    Actor = tmp2.text
+                    key = "actor"+str(i)
+                    res[key] = Actor
+                    i = i + 1
+                if i < 3:
+                    while i < 3:
+                        key = "actor" + str(i)
+                        res[key] = ""
+                        i = i + 1
         txtblocks = imdb_soup.findAll("div", attrs={"class": "txt-block"})
         for txtblock in txtblocks:
             fieldType = txtblock.find("h4")
