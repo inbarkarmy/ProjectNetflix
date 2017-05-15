@@ -13,7 +13,7 @@ def imdb_pars(imdb_soup):
         inf = imdb_soup.find("div", attrs={"class": "subtext"})
         time = inf.find("time")
         Time = time.text.strip()
-        res['time'] = Time
+        res['Time'] = Time
         i = 0
         for a in inf.findAll("a"):
             if i == 3:
@@ -23,7 +23,8 @@ def imdb_pars(imdb_soup):
             if (span):
                 Genre = span.text
                 res[key] = Genre
-            i = i + 1
+                i = i + 1
+        print(i)
         if i < 3:
             while i < 3:
                 key = "genre" + str(i)
@@ -106,7 +107,7 @@ def parse_rotten_tomato(rotten_tomatoes_soup):
         if category_n == "Runtime:":
             t = li.find("time")
             Time = t.text.strip()
-            res['time'] = Time
+            res['Time'] = Time
         if category_n == "Directed By:":
             a = li.find('a')
             Directed = a.text.strip()
@@ -168,24 +169,70 @@ def get_results(name, year, j):
             res = parse_rotten_tomato(rotten_tomatoes_soup)
             j = j + 1
             break
-    if 'time' not in res.keys():
-        res['time'] = ""
+    if 'Time' not in res.keys():
+        res['Time'] = ""
+    if 'lang' not in res.keys():
+        res['lang'] = ""
     if 'director' not in res.keys():
         res['director'] = ""
     if 'country' not in res.keys():
         res['country'] = ""
     if 'rate' not in res.keys():
         res['rate'] = ""
-    df = pd.DataFrame({name:[year, res['genre0'],res['genre1'],res['genre2'], res['actor0'],res['actor1'],res['actor2'], res['director'], res['time'], res['country'], res['rate']]})
-    df.to_csv(r'C:\Users\inbar\Desktop\project\ProjectNetflix\Movies_info.csv')
-    print(df)
+    #df = pd.DataFrame({name:[year, res['genre0'],res['genre1'],res['genre2'], res['actor0'],res['actor1'],res['actor2'], res['director'], res['time'], res['country'], res['rate']]})
+    #df.to_csv(r'C:\Users\inbar\Desktop\project\ProjectNetflix\Movies_info.csv')
+    #print(df)
     driver.close()
-    return j
+    return res
 
 j = 0
+title = []
+year_ = []
+duration = []
+country = []
+director = []
+rate = []
+lang = []
+genre0 =[]
+genre1 =[]
+genre2 =[]
+actor0 = []
+actor1 =[]
+actor2 = []
+df = pd.DataFrame()
 for line in open('movie_titles.txt'):
     uid, year, name = line.split(',')
     name = name[:-1]
     #print(search)
-    j = get_results(name, year, j)
-    print(j)
+    res = get_results(name, year, j)
+    title.append(name)
+    year_.append(year)
+    print(res['Time'])
+    duration.append(res['Time'])
+    country.append(res['country'])
+    director.append(res['director'])
+    rate.append(res['rate'])
+    lang.append(res['lang'])
+    genre0.append(res['genre0'])
+    genre1.append(res['genre1'])
+    genre2.append(res['genre2'])
+    actor0.append(res['actor0'])
+    actor1.append(res['actor1'])
+    actor2.append(res['actor2'])
+print(genre0)
+df['name'] = title
+df['time'] = duration
+df ['director'] = director
+df ['country'] = country
+df ['lang'] = lang
+df['rate'] = rate
+df['genre0'] = genre0
+df['genre1'] = genre1
+df['genre2'] = genre2
+df['actor0'] = actor0
+df['actor1'] = actor1
+df['actor2'] = actor2
+df.to_csv(r'C:\Users\inbar\Desktop\project\ProjectNetflix\Movies_info.csv')
+print(df)
+print(j)
+
