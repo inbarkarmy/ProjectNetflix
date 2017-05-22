@@ -8,11 +8,13 @@ from selenium.webdriver.common.keys import Keys
 import pandas as pd
 
 def imdb_pars(imdb_soup):
-        #print(imdb_soup.prettify())
+        print(imdb_soup.prettify())
         res = dict()
         inf = imdb_soup.find("div", attrs={"class": "subtext"})
         time = inf.find("time")
         Time = time.text.strip()
+        if Time is None:
+            res['Time'] = ""
         res['Time'] = Time
         i = 0
         for a in inf.findAll("a"):
@@ -63,10 +65,6 @@ def imdb_pars(imdb_soup):
                     if (lang):
                         Lang = lang.text
                         res['lang'] = Lang
-                #if fieldType.text == "Color:":
-                 #   color = txtblock.find("a")
-                  #  if (color):
-                   #     print(color.text)
         recDirectorrecEllipsis = imdb_soup.find("div", attrs={"class": "rec-director rec-ellipsis"})
         if (recDirectorrecEllipsis):
             Director = recDirectorrecEllipsis.text[recDirectorrecEllipsis.text.find(":") + 1:]
@@ -143,6 +141,7 @@ def parse_rotten_tomato(rotten_tomatoes_soup):
     return res
 
 def get_results(name, year, j):
+    res = dict()
     title = name + ' ' + year
     print("name:", title)
     driver = webdriver.Chrome(os.path.abspath('./chromedriver_win32/chromedriver'))
@@ -162,13 +161,18 @@ def get_results(name, year, j):
             imdb_soup = BeautifulSoup(imdb.text, "html.parser")
             res = imdb_pars(imdb_soup)
             j = j+1
+            if res['Time'] is None:
+                return
             break
         if web_name == "rottentomatoes":
             rotten_tomatoes = requests.get(link)
             rotten_tomatoes_soup = BeautifulSoup(rotten_tomatoes.text, "html.parser")
             res = parse_rotten_tomato(rotten_tomatoes_soup)
             j = j + 1
+            if res['Time'] is None:
+                return
             break
+
     if 'Time' not in res.keys():
         res['Time'] = ""
     if 'lang' not in res.keys():
@@ -179,6 +183,19 @@ def get_results(name, year, j):
         res['country'] = ""
     if 'rate' not in res.keys():
         res['rate'] = ""
+    if 'actor0' not in res.keys():
+        res['actor0'] = ""
+    if 'actor1' not in res.keys():
+        res['actor1'] = ""
+    if 'actor2' not in res.keys():
+        res['actor2'] = ""
+    if 'genre0' not in res.keys():
+        res['genre0'] = ""
+    if 'genre1' not in res.keys():
+        res['genre1'] = ""
+    if 'genre2' not in res.keys():
+        res['genre2'] = ""
+
     #df = pd.DataFrame({name:[year, res['genre0'],res['genre1'],res['genre2'], res['actor0'],res['actor1'],res['actor2'], res['director'], res['time'], res['country'], res['rate']]})
     #df.to_csv(r'C:\Users\inbar\Desktop\project\ProjectNetflix\Movies_info.csv')
     #print(df)
@@ -221,6 +238,7 @@ for line in open('movie_titles.txt'):
     actor2.append(res['actor2'])
 print(genre0)
 df['name'] = title
+df['year'] = year_
 df['time'] = duration
 df ['director'] = director
 df ['country'] = country
@@ -235,4 +253,3 @@ df['actor2'] = actor2
 df.to_csv(r'C:\Users\inbar\Desktop\project\ProjectNetflix\Movies_info.csv')
 print(df)
 print(j)
-
