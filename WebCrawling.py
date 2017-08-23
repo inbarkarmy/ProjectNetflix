@@ -155,7 +155,7 @@ def get_results(name, year, j):
     elem.clear()
     elem.send_keys(title)
     elem.send_keys(Keys.RETURN)
-    time.sleep(3)
+    #time.sleep(0.2)
     for elem in driver.find_elements_by_css_selector('h3.r a'):
         link = elem.get_attribute('href')
         #print(link)
