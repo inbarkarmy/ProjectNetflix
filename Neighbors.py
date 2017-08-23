@@ -37,6 +37,7 @@ def createMovieDistancesMatrix():
     data = pd.read_csv('Movies_info.csv', encoding='latin1')
     moviesNum =len(data["name"])
     genreMatrix = createGenreMatrix()
+    print(genreMatrix )
     res = numpy.zeros((moviesNum, moviesNum))
     i=0
     for movie1 in data["name"]:
@@ -54,19 +55,32 @@ def createMovieDistancesMatrix():
 def createGenreMatrix():
     data = pd.read_csv('Movies_info.csv',encoding='latin1')
     totalGenres = 22
-    genreMatrix = numpy.zeros((7,totalGenres))
+    moviesNum= len(data["name"])
+    genreMatrix = numpy.zeros((moviesNum,totalGenres+1))
     movieCount =0
+    dictGenre = {0: 'Comedy', 1: 'Action', 2: 'Adventure', 3: {'Animated', 'Animation'}, 4: 'Biography', 5: 'Crime',
+                 6: 'Documentary', 7: 'Drama', 8: 'Family', 9: 'Fantasy', 10: 'Film-Noir', 11: 'History',
+                 12: 'Horror', 13: 'Music', 14: 'Musical', 15: 'Mystery', 16: 'Romance',
+                 17: {'Science Fiction', 'Sci-Fi'}, 18: {'Sports', 'Sport'}, 19: 'Thriller', 20: 'War', 21: 'Western',
+                 22: 'Fitness'}
     for row in data["name"]:
         for i in range(3):
             curGenre = "genre"+str(i)
-            genre = data[curGenre][movieCount]
-            dictGenre={0:'Comedy' ,1:'Action' , 2:'Adventure' , 3:('Animated','Animation'), 4:'Biography', 5:'Crime',
-                6:'Documentary', 7:'Drama',8:'Family', 9:'Fantasy', 10:'Film-Noir', 11:'History',
-                12:'Horror', 13:'Music', 14:'Musical', 15:'Mystery', 16:'Romance',
-                17:('Science Fiction','Sci-Fi'), 18:'Sport', 19:'Thriller', 20:'War', 21:'Western'}
-            for key in range(21):
-                if genre==dictGenre.get(key):
-                    genreMatrix[movieCount][key]=1
+            genreA = data[curGenre][movieCount]
+            genre = str(genreA).rstrip()
+            for key in range(totalGenres+1):
+                print(len(dictGenre.get(key)))
+                if len(dictGenre.get(key))==2:
+                    for val in dictGenre.get(key):
+                        if genre==val:
+                            genreMatrix[movieCount][key]=1
+                            break
+                else:
+                    print(genre)
+                    print(dictGenre.get(key))
+                    if genre == dictGenre.get(key):
+                        genreMatrix[movieCount][key] = 1
+                        break
         movieCount = movieCount + 1
     return genreMatrix
 
