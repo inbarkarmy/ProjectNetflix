@@ -93,6 +93,7 @@ FindKNearestNeighbors()
 def FindKNearestNeighbors(movieNum,userID):
     kDistArr = numpy.zeros(K)
     movieArr = numpy.zeros(K)
+    rateArr = numpy.zeros(K)
     for i in range(K):
         kDistArr[i] = maxDist+1
     with open('UserFilmList.json', 'r') as fp:
@@ -105,6 +106,7 @@ def FindKNearestNeighbors(movieNum,userID):
                 kDistArr[j] = curDist
                 movieArr[j] = val
                 break
+    j=0
     for movieID in movieArr:
         fileName = "mv_"
         maxID=1000000
@@ -117,7 +119,27 @@ def FindKNearestNeighbors(movieNum,userID):
         fileName = fileName + str(movieID)
         fileName = "/training_set/training_set" + fileName
         print(fileName)
-        #todo - remove first line from file
-        #for line in open(fileName):
-         #   curID = line[:line.find(',')]
-          #  print(curID)
+        #skipping the first row
+        iterLine = open(fileName)
+        next(iterLine)
+        for line in iterLine:
+            ratetmp = line[line.find(',') + 1:]
+            rate = ratetmp[:ratetmp.find(',')]
+            curID = line[ :line.find(',')]
+            print("curID:")
+            print(curID)
+            print("rate:")
+            print(rate)
+            if curID == userID:
+                rateArr[j] = rate
+                break
+        j=j+1
+    sum =0
+    for p in range(K):
+        sum = sum + rateArr[p]
+    avg = sum/K
+    return avg 
+
+
+
+
