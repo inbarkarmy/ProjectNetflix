@@ -1,9 +1,11 @@
 from sklearn.preprocessing import OneHotEncoder
 import numpy as numpy
 import pandas as pd
+import json
 
 #max distance between movies - define as needed
 maxDist = 4
+K=8
 
 def caculateVecDistance(binaryVec1, binaryVec2 ):
     dist=maxDist
@@ -17,7 +19,8 @@ def caculateVecDistance(binaryVec1, binaryVec2 ):
 #genreWeghit = 4
 #rateWeight = 2
 #yearWeight = 0.01
-def TwoMoviesDist(genreVec1, rate1, year1, genreVec2, rate2, year2):
+#def TwoMoviesDist(genreVec1, rate1, year1, genreVec2, rate2, year2):
+def TwoMoviesDist(genreVec1, genreVec2):
 
     genreDist = caculateVecDistance(genreVec1,genreVec2)
     #if rate1>rate2:
@@ -35,18 +38,17 @@ def TwoMoviesDist(genreVec1, rate1, year1, genreVec2, rate2, year2):
 
 def createMovieDistancesMatrix():
     data = pd.read_csv('Movies_info.csv', encoding='latin1')
-    moviesNum =len(data["name"])
+    moviesNum =len(data["title"])
     genreMatrix = createGenreMatrix()
-    print(genreMatrix )
     res = numpy.zeros((moviesNum, moviesNum))
     i=0
-    for movie1 in data["name"]:
+    for movie1 in data["title"]:
         j=0
-        for movie2 in data["name"]:
+        for movie2 in data["title"]:
             if i==j:
                 curDist=0
             else:
-                curDist = TwoMoviesDist(genreMatrix[i],3,1998,genreMatrix[j],3,1998)
+                curDist = TwoMoviesDist(genreMatrix[i],genreMatrix[j])
             res[i][j] = curDist
             j=j+1
         i=i+1
@@ -55,7 +57,7 @@ def createMovieDistancesMatrix():
 def createGenreMatrix():
     data = pd.read_csv('Movies_info.csv',encoding='latin1')
     totalGenres = 22
-    moviesNum= len(data["name"])
+    moviesNum= len(data["title"])
     genreMatrix = numpy.zeros((moviesNum,totalGenres+1))
     movieCount =0
     dictGenre = {0: 'Comedy', 1: 'Action', 2: 'Adventure', 3: {'Animated', 'Animation'}, 4: 'Biography', 5: 'Crime',
@@ -63,27 +65,59 @@ def createGenreMatrix():
                  12: 'Horror', 13: 'Music', 14: 'Musical', 15: 'Mystery', 16: 'Romance',
                  17: {'Science Fiction', 'Sci-Fi'}, 18: {'Sports', 'Sport'}, 19: 'Thriller', 20: 'War', 21: 'Western',
                  22: 'Fitness'}
-    for row in data["name"]:
+
+    for row in data["title"]:
         for i in range(3):
             curGenre = "genre"+str(i)
             genreA = data[curGenre][movieCount]
             genre = str(genreA).rstrip()
             for key in range(totalGenres+1):
-                print(len(dictGenre.get(key)))
                 if len(dictGenre.get(key))==2:
                     for val in dictGenre.get(key):
                         if genre==val:
                             genreMatrix[movieCount][key]=1
                             break
                 else:
-                    print(genre)
-                    print(dictGenre.get(key))
                     if genre == dictGenre.get(key):
                         genreMatrix[movieCount][key] = 1
                         break
         movieCount = movieCount + 1
     return genreMatrix
 
+movieDistancesMatrix = createMovieDistancesMatrix()
+movieDistancesMatrix.dump("myMat.dat")
+testMat = numpy.load("myMat.dat")
+#print(testMat)
+FindKNearestNeighbors
 
-print(createMovieDistancesMatrix())
-
+def FindKNearestNeighbors(movieNum,userID):
+    kDistArr = numpy.zeros(K)
+    movieArr = numpy.zeros(K)
+    for i in range(K):
+        kDistArr[i] = maxDist+1
+    with open('UserFilmList.json', 'r') as fp:
+        userDict = json.load(fp)
+    usr = userDict.get(userID)
+    for val in usr:
+        curDist = TwoMoviesDist(movieNum,val)
+        for j in range(K):
+            if curDist< kDistArr:
+                kDistArr[j] = curDist
+                movieArr[j] = val
+                break
+    for movieID in movieArr:
+        fileName = "mv_"
+        maxID=1000000
+        for i in range(7):
+            if movieID < maxID:
+                fileName = fileName + str(0)
+                maxID = maxID/10
+            else:
+                break
+        fileName = fileName + str(movieID)
+        fileName = "/training_set/training_set" + fileName
+        print(fileName)
+        #todo - remove first line from file
+        #for line in open(fileName):
+         #   curID = line[:line.find(',')]
+          #  print(curID)
