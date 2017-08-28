@@ -88,7 +88,7 @@ movieDistancesMatrix = createMovieDistancesMatrix()
 movieDistancesMatrix.dump("myMat.dat")
 testMat = numpy.load("myMat.dat")
 #print(testMat)
-FindKNearestNeighbors
+FindKNearestNeighbors()
 
 def FindKNearestNeighbors(movieNum,userID):
     kDistArr = numpy.zeros(K)
