@@ -2,10 +2,10 @@ from sklearn.preprocessing import OneHotEncoder
 import numpy as numpy
 import pandas as pd
 import json
+import math
 
 #max distance between movies - define as needed
 maxDist = 4
-K=8
 
 def caculateVecDistance(binaryVec1, binaryVec2 ):
     dist=maxDist
@@ -84,21 +84,25 @@ def createGenreMatrix():
         movieCount = movieCount + 1
     return genreMatrix
 
-movieDistancesMatrix = createMovieDistancesMatrix()
-movieDistancesMatrix.dump("myMat.dat")
-testMat = numpy.load("myMat.dat")
+#movieDistancesMatrix = createMovieDistancesMatrix()
+#movieDistancesMatrix.dump("myMat.dat")
+#testMat = numpy.load("myMat.dat")
 #print(testMat)
-FindKNearestNeighbors()
+
 
 def FindKNearestNeighbors(movieNum,userID):
+    with open('UserFilmList.json', 'r') as fp:
+        userDict = json.load(fp)
+    print("finished opening")
+    usr = userDict[userID]
+    #todo - change k
+    K = math.sqrt((len(usr)))
     kDistArr = numpy.zeros(K)
     movieArr = numpy.zeros(K)
     rateArr = numpy.zeros(K)
+    print(K)
     for i in range(K):
         kDistArr[i] = maxDist+1
-    with open('UserFilmList.json', 'r') as fp:
-        userDict = json.load(fp)
-    usr = userDict.get(userID)
     for val in usr:
         curDist = TwoMoviesDist(movieNum,val)
         for j in range(K):
@@ -117,7 +121,7 @@ def FindKNearestNeighbors(movieNum,userID):
             else:
                 break
         fileName = fileName + str(movieID)
-        fileName = "/training_set/training_set" + fileName
+        fileName = "\training_set\training_set" + fileName
         print(fileName)
         #skipping the first row
         iterLine = open(fileName)
@@ -138,8 +142,9 @@ def FindKNearestNeighbors(movieNum,userID):
     for p in range(K):
         sum = sum + rateArr[p]
     avg = sum/K
-    return avg 
+    print(avg)
+    return avg
 
 
 
-
+FindKNearestNeighbors(4,1544320)
